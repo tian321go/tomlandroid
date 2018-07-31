@@ -186,7 +186,6 @@ public class KhinfSDK {
      * Context对象
      */
     public static void getDefaultInfo(Context context) {
-
         Property defaultinfo = new Property();
         try {
             defaultinfo.load(context.getResources().getAssets().open("init.properties"));
