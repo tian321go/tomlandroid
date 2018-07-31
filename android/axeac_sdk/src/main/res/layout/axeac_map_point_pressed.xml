@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:padding="2dp"
+    android:orientation="vertical" >
+
+    <com.axeac.app.sdk.customview.AutoButtonView
+        android:id="@+id/map_point_start"
+        android:layout_width="fill_parent"
+        android:layout_height="40dip"
+        android:background="#02a3f4"
+        android:layout_marginTop="5dp"
+        android:text="@string/axeac_map_point_start"
+        android:textColor="@color/white" />
+    <com.axeac.app.sdk.customview.AutoButtonView
+        android:id="@+id/map_point_end"
+        android:layout_width="fill_parent"
+        android:layout_height="40dip"
+        android:layout_marginTop="5dp"
+        android:background="#02a3f4"
+        android:text="@string/axeac_map_point_end"
+        android:textColor="@color/white" />
+    <com.axeac.app.sdk.customview.AutoButtonView
+        android:id="@+id/map_point_remove"
+        android:layout_width="fill_parent"
+        android:layout_height="40dip"
+        android:layout_marginTop="5dp"
+        android:background="#02a3f4"
+        android:text="@string/axeac_map_point_remove"
+        android:textColor="@color/white" />
+
+</LinearLayout>

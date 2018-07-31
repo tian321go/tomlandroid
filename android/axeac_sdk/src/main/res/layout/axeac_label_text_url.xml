@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="100dip">
+
+    <LinearLayout
+        android:id="@+id/label_text_url_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="37dip"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true">
+
+        <ImageView
+            android:id="@+id/label_text_url"
+            android:layout_width="37dip"
+            android:layout_height="37dip"
+            android:background="#00000000"
+            android:gravity="center_vertical"
+            android:padding="3dip"
+            android:src="@drawable/axeac_url" />
+
+        <Button
+            android:id="@+id/label_text_btn"
+            android:layout_width="37dip"
+            android:layout_height="37dip"
+            android:background="#02a3f4"
+            android:gravity="center"
+            android:singleLine="true"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/label_text_notnil"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:singleLine="true"
+            android:text="*"
+            android:textColor="@color/red"
+            android:textSize="30sp"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <android.support.v7.widget.AppCompatEditText
+        android:id="@+id/label_text_single"
+        android:layout_width="fill_parent"
+        android:layout_height="37dip"
+        android:layout_toLeftOf="@id/label_text_url_layout"
+        android:background="@drawable/axeac_bg_edit"
+        android:gravity="center_vertical"
+        android:inputType="textUri"
+        android:paddingLeft="10dip"
+        android:paddingRight="10dip"
+        android:singleLine="true"
+        android:textColor="@color/black" />
+
+    <android.support.v7.widget.AppCompatEditText
+        android:id="@+id/label_text_mult"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_toLeftOf="@id/label_text_url_layout"
+        android:background="@drawable/axeac_bg_edit"
+        android:gravity="top"
+        android:inputType="textMultiLine"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dip"
+        android:paddingRight="10dip"
+        android:paddingTop="10dp"
+        android:textColor="@color/black" />
+
+</RelativeLayout>

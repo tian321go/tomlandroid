@@ -1,0 +1,83 @@
+package com.axeac.app.client.activity;
+
+import android.os.Bundle;
+import android.view.KeyEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.widget.FrameLayout;
+
+import com.axeac.app.client.R;
+import com.axeac.app.sdk.activity.BaseActivity;
+import com.axeac.app.sdk.utils.StaticObject;
+
+/**
+ *
+ * 关于界面
+ * describe:About Interface
+ * @author axeac
+ * @version 2.3.0.0001
+ *
+ * */
+public class AboutActivity extends BaseActivity {
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		this.setContentView(R.layout.axeac_common_layout_normal);
+		this.findViewById(R.id.settings_layout_bottom).setVisibility(View.GONE);
+		setTitle(R.string.settings_about);
+		FrameLayout layout = (FrameLayout) this.findViewById(R.id.settings_layout_center);
+		WebView webView = new WebView(this);
+		webView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
+		webView.getSettings().setRenderPriority(WebSettings.RenderPriority.HIGH);
+		webView.setWebViewClient(new WebViewClient() {
+			@Override
+			public boolean shouldOverrideUrlLoading(WebView view, String url) {
+				view.loadUrl(url);
+				return true;
+			}
+		});
+		webView.setWebChromeClient(new WebChromeClient() {
+			@Override
+			public void onProgressChanged(WebView view, int newProgress) {
+				if (newProgress == 100) {
+					view.postInvalidate();
+				}
+			}
+		});
+		webView.setMinimumHeight(StaticObject.deviceHeight);
+		layout.addView(webView);
+		String url = StaticObject.read.getString(StaticObject.SERVERURL, "");
+		String nu = url.substring(0,url.lastIndexOf("/"))+"/about.html";
+		webView.loadUrl(nu);
+		backPage.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				backFuc();
+			}
+		});
+	}
+
+	/**
+	 * 结束Activity
+	 * @see android.view.KeyEvent.Callback
+	 * */
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_BACK) {
+			backFuc();
+		}
+		return false;
+	}
+
+	/**
+	 * 结束Activity
+	 * */
+	private void backFuc() {
+		this.finish();
+	}
+}

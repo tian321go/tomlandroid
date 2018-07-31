@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.axeac.app.sdk.customview.MToolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="40dip"
+    android:background="#02a3f4"
+    android:elevation="1dp"
+    android:fitsSystemWindows="true"
+    android:minHeight="40dp"
+    app:popupTheme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+    app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+    <ImageButton
+        android:id="@+id/layout_button"
+        android:layout_width="40dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="left"
+        android:background="@drawable/axeac_back"
+        />
+    <TextView
+        android:id="@+id/layout_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:ems="8"
+        android:ellipsize="marquee"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:gravity="center"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:scrollHorizontally="true"
+        android:singleLine="true"
+        android:textColor="@color/white"
+        android:textSize="20sp" />
+
+
+
+</com.axeac.app.sdk.customview.MToolbar>

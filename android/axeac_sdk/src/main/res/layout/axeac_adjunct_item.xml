@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/axeac_settings_list_single_normal" >
+
+    <ImageView
+        android:id="@+id/adjunct_download"
+        android:layout_width="30dip"
+        android:layout_height="30dip"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:background="#00000000"
+        android:src="@drawable/axeac_adjunct_download" />
+
+    <ImageView
+        android:id="@+id/adjunct_preview"
+        android:layout_width="30dip"
+        android:layout_height="30dip"
+        android:layout_centerVertical="true"
+        android:layout_toLeftOf="@id/adjunct_download"
+        android:background="#00000000"
+        android:src="@drawable/axeac_adjunct_preview" />
+
+    <ImageView
+        android:id="@+id/adjunct_filetype"
+        android:layout_width="30dip"
+        android:layout_height="30dip"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:background="#00000000"
+        android:src="@drawable/axeac_file_icon_unknow" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:paddingLeft="8dip"
+        android:paddingRight="8dip"
+        android:layout_toLeftOf="@id/adjunct_preview"
+        android:layout_toRightOf="@id/adjunct_filetype"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/adjunct_filename"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:textColor="#636363"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/adjunct_filesize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:textColor="#636363"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+</RelativeLayout>

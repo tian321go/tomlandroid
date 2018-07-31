@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@color/white"
+    android:layout_width="400px"
+    android:layout_height="400px" >
+    <ImageView
+        android:id="@+id/takephoto"
+        android:layout_alignParentTop="true"
+        android:layout_width="400px"
+        android:layout_height="400px"
+        android:src="@drawable/axeac_paizhao" />
+
+    <ImageButton
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:id="@+id/deletephoto"
+        android:layout_gravity="center_horizontal"
+        android:layout_width="55px"
+        android:layout_height="55px"
+        android:src="@drawable/axeac_del_normal" />
+
+</RelativeLayout>

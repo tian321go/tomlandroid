@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.axeac.app.client">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RESTART_PACKAGES" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
+    <uses-permission android:name="com.android.launcher.permission.UNINSTALL_SHORTCUT" />
+    <uses-permission android:name="net.sunniwell.launcher.permission.READ_SETTINGS" />
+    <uses-permission android:name="net.sunniwell.launcher.permission.WRITE_SETTINGS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.GET_TASKS" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.FLASHLIGHT" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <supports-screens
+        android:anyDensity="true"
+        android:largeScreens="true"
+        android:normalScreens="true"
+        android:resizeable="true"
+        android:smallScreens="true" />
+
+    <application
+        android:icon="@mipmap/icon"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        android:vmSafeMode="true">
+        <activity
+            android:name="com.axeac.app.client.activity.InitActivity"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppStartLoad">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+        </activity>
+        <activity
+            android:name="com.axeac.app.client.activity.CheckCurUsersActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.axeac.app.client.activity.PwdUpdateActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.axeac.app.client.activity.LoginActivity"
+            android:screenOrientation="portrait" >
+
+            <intent-filter>
+                <action android:name="android.intent.action.CREATE_SHORTCUT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.axeac.app.client.activity.MainActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.axeac.app.client.activity.FlowCountActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.axeac.app.client.activity.SettingsActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name="com.axeac.app.client.activity.SystemSetupsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.axeac.app.client.activity.NetworkListActivity"
+            android:screenOrientation="portrait">
+        </activity>
+        <activity
+            android:name="com.axeac.app.client.activity.NetworkSetActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.axeac.app.client.activity.AboutActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.axeac.app.client.activity.SysAdminActivity"
+            android:screenOrientation="portrait" />
+
+        <service
+            android:name="com.axeac.app.client.service.TaskCountTaskService"
+            android:launchMode="singleTask"
+            android:enabled="true" />
+
+        <service android:name=".service.MsgCountTaskService"
+            android:launchMode="singleTask"
+            android:enabled="true"/>
+
+        <service
+            android:name="com.axeac.app.client.service.ToyVpnService"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:launchMode="singleTask"
+            android:permission="android.permission.BIND_VPN_SERVICE">
+            <!--android:permission="android.permission.BIND_VPN_SERVICE"  -->
+            <intent-filter>
+                <action android:name="android.net.VpnService" />
+            </intent-filter>
+        </service>
+
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            tools:replace="android:authorities"
+            android:authorities="com.axeac.app.client.kh_update.file_provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                tools:replace="android:resource"
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/kh_upgrade_file_paths" />
+        </provider>
+
+        <service
+            android:name="com.axeac.app.client.service.QuickService"
+            android:label="WorkCenter"
+            android:icon="@mipmap/icon_trans"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+        <receiver android:name=".broadcast.BootBroadcastReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"></action>
+                <category android:name="android.intent.category.LAUNCHER"></category>
+            </intent-filter>
+        </receiver>
+
+    </application>
+
+</manifest>
