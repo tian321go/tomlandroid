@@ -60,7 +60,7 @@ public class HtmlContent extends Component {
 	/**
 	 * 存储长按某行时出现的按钮的list集合
 	 * */
-	private List<String> clicks = new ArrayList<String>();
+		private List<String> clicks = new ArrayList<String>();
 	/**
 	 * html代码
 	 * <br>默认值为空

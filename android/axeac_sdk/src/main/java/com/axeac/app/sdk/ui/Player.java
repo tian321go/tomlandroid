@@ -1,8 +1,15 @@
 package com.axeac.app.sdk.ui;
 
 import android.app.Activity;
+import android.content.Context;
+import android.media.MediaPlayer;
+import android.net.Uri;
+import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.MediaController;
 import android.widget.Toast;
@@ -20,6 +27,7 @@ import com.axeac.app.sdk.utils.StaticObject;
  */
 public class Player extends Component {
 
+	private View view;
 	/**
 	 * VideoView对象
 	 * */
@@ -45,9 +53,10 @@ public class Player extends Component {
 	
 	public Player(Activity ctx) {
 		super(ctx);
-		mVideoView = new VideoView(ctx);
-		mVideoView.setLayoutParams(new ViewGroup.LayoutParams(
-				StaticObject.deviceWidth, StaticObject.deviceHeight));
+		view =  LayoutInflater.from(ctx).inflate(R.layout.axeac_player,null);
+		mVideoView = view.findViewById(R.id.player);
+//		mVideoView.setLayoutParams(new ViewGroup.LayoutParams(
+//				320, 480));
 	}
 
 	/**
@@ -91,24 +100,29 @@ public class Player extends Component {
 	 * */
 	@Override
 	public void execute() {
+		WindowManager wm = (WindowManager) ctx
+				.getSystemService(Context.WINDOW_SERVICE);
+		int screenwidth = wm.getDefaultDisplay().getWidth();
+		int sereenheight = wm.getDefaultDisplay().getHeight();
+
 		if (this.width == "-1" && this.height == -1) {
-			mVideoView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+			mVideoView.setLayoutParams(new LinearLayout.LayoutParams(screenwidth, sereenheight, 1));
 		} else {
 			if (this.width == "-1") {
-				mVideoView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, this.height, 1));
+				mVideoView.setLayoutParams(new LinearLayout.LayoutParams(screenwidth, this.height, 1));
 			} else if (this.height == -1) {
 				if (this.width.endsWith("%")) {
 					int viewWeight = 100 - (int) Float.parseFloat(this.width.substring(0, this.width.indexOf("%")));
 					mVideoView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, viewWeight));
 				} else {
-					mVideoView.setLayoutParams(new LinearLayout.LayoutParams(Integer.parseInt(this.width), LinearLayout.LayoutParams.WRAP_CONTENT));
+					mVideoView.setLayoutParams(new LinearLayout.LayoutParams(Integer.parseInt(this.width), sereenheight));
 				}
 			} else {
 				if (this.width.endsWith("%")) {
 					int viewWeight = 100 - (int) Float.parseFloat(this.width.substring(0, this.width.indexOf("%")));
 					mVideoView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, viewWeight));
 				} else {
-					mVideoView.setLayoutParams(new LinearLayout.LayoutParams(Integer.parseInt(this.width), this.height));
+					mVideoView.setLayoutParams(new LinearLayout.LayoutParams(screenwidth, this.height));
 				}
 			}
 		}
@@ -117,11 +131,16 @@ public class Player extends Component {
 			if (option.equals("sound")) {
 				
 			} else {
-				mVideoView.setMediaController(new MediaController(ctx));
+//				mVideoView.setVideoURI(Uri.parse(url));
+				MediaController  mediaController=new MediaController(ctx);
+				mVideoView.setMediaController(mediaController);
 				mVideoView.setVideoPath(url);
-				mVideoView.requestFocus();
-				mVideoView.seekTo(0);
-				mVideoView.start();
+				mVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+					@Override
+					public void onPrepared(MediaPlayer mp) {
+						mVideoView.start();//开始播放视频
+					}
+				});
 			}
 		} else {
 			Toast.makeText(ctx, R.string.axeac_toast_exp_tovideopath, Toast.LENGTH_SHORT).show();
@@ -138,7 +157,7 @@ public class Player extends Component {
 	 * */
 	@Override
 	public View getView() {
-		return mVideoView;
+		return view;
 	}
 
 	@Override

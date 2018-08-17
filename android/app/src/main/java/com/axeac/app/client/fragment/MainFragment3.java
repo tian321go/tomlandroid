@@ -139,16 +139,17 @@ public class MainFragment3 extends BaseFragment {
                     LocalBroadcastManager.getInstance(act).sendBroadcast(new Intent(StaticObject.CHANGE_GRID_OR_LIST_ACTION));
                     ((MainActivity) getActivity()).showMidView();
                 }
+                if (position == 2) {
+                    freshIcon("MEIP_LOGIN=MEIP_LOGIN");
+
+                }
                 if (position == 3) {
                     startActivity(new Intent(act, PwdUpdateActivity.class));
                 }
                 if (position == 4) {
                     startActivity(new Intent(act, AboutActivity.class));
                 }
-                if (position == 2) {
-                    freshIcon("MEIP_LOGIN=MEIP_LOGIN");
 
-                }
                 if (position == 5) {
                     ((MainActivity) getActivity()).backFuc();
                 }

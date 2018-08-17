@@ -4,7 +4,10 @@ import android.util.Log;
 
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Vector;
 
 public class Property implements Serializable {
@@ -12,6 +15,7 @@ public class Property implements Serializable {
     protected LinkedHashtable properties;
     protected String split = "\r\n";
     private static LinkedHashtable code;
+    private HashMap<String,String> map;
 
     static {
         code = new LinkedHashtable();
@@ -234,10 +238,356 @@ public class Property implements Serializable {
         load(StringUtil.load(in));
     }
 
+    public void loadToml(String[] config) {
+        if (properties == null) {
+            properties = new LinkedHashtable();
+        } else
+            properties.clear();
+        if (config == null || config.length == 0)
+            return;
+        int idx = 0;
+        String lastKey = null;
+        String var = "var.";
+        String key = null;
+        String value = null;
+        String isTab = null;
+        List<String> formAddList = new ArrayList<>();
+        List<HashMap<String, String>> containerAddList = new ArrayList<HashMap<String,String>>();
+        HashMap<String, String> tabIndex = new HashMap<String,String>();
+        HashMap<String, String> addUI = new HashMap<String,String>();
+        for (int i = 0; i < config.length; i++) {
+            String s = decoding(StringUtil.toGB2312(config[i].trim()));
+            if (s.length() == 0 || s.startsWith("#")){
+                continue;
+            }
+            idx = s.indexOf("=");
+
+            //解析[Form]标签
+            if(s.startsWith("[Form")&&s.indexOf(".")==-1) {
+                lastKey = "Form";
+                properties.put(lastKey, lastKey);
+                properties.put(lastKey + "." + "id", s.substring(s.indexOf("[") + 1,s.indexOf("]")));
+                continue;
+            }
+            //解析不是 [Form 开头的控件且存在=但不存在 . 属性
+            else if(!s.startsWith("[Form.")&&idx!=-1&&s.indexOf(".")==-1){
+                key = s.substring(0, idx).trim();
+
+                if (key.contains("<p>")||key.contains("<p")||key.contains("<center>")||key.contains("</p>")
+                        ||key.contains("<span>")||key.contains("<span")||key.contains("<center>")||key.contains("</span>")
+                        ||key.contains("<div>")||key.contains("<div")||key.contains("<center>")||key.contains("</div>")
+                        ||key.contains("<img>")||key.contains("<img")||key.contains("<center>")||key.contains("</img>")) {
+                    if (lastKey != null&&key != null) {
+                        String keys = lastKey + "." + key;
+                        Object o = properties.get(keys);
+                        properties.put(keys, (o == null ? "" : (String) o) + ("\r\n" + s.trim()));
+                        continue;
+                    }
+                }
+
+                if(s.indexOf("\"")!=-1) {
+                    value = s.substring(s.indexOf("\"") + 1,s.lastIndexOf("\"")).trim();
+                }else {
+                    value = s.substring(idx+1).trim();
+                }
+
+                String add = "false";
+                if(key.equals("add")) {
+                    add = value;
+                    addUI.put(lastKey, add);
+                    continue;
+                }
+                if(isTab!=null&&isTab.startsWith("TabContainer")&&key.equals("index")) {
+                    tabIndex.put(key, value);
+                    isTab = null;
+                }else {
+                    properties.put(lastKey + "." + key, value);
+                }
+                continue;
+            }
+            //解析 [Form. 开头且只有一个.的标签
+            else if(s.startsWith("[Form.")&&s.indexOf(".")==s.lastIndexOf(".")&&s.indexOf(".")!=-1) {
+                lastKey = s.substring(s.indexOf(".") + 1,s.indexOf("]")).trim();
+                value = lastKey.substring(0,lastKey.indexOf("_"));
+                formAddList.add(lastKey);
+                properties.put(var + lastKey, value);
+                continue;
+            }
+            //解析 [Form. 开头且有多个.的标签，此时标签为容器控件
+            else if(s.startsWith("[Form.")&&s.indexOf(".")!=-1&&s.indexOf(".")!=s.lastIndexOf(".")) {
+                String s1 = s.substring(s.indexOf("[Form.")+1,s.indexOf("]"));
+                String [] values = s1.split("\\.");
+                value = s1.substring(s1.lastIndexOf(".")+1,s1.length()).trim();
+                HashMap<String,String> map = new HashMap<>();
+                map.put(values[values.length-2], value);
+                properties.put(var + values[values.length-1], value.substring(0, value.lastIndexOf("_")));
+                containerAddList.add(map);
+                lastKey = value;
+                isTab = s1;
+                continue;
+            }
+            //不以[From.开头且没有=
+            else if (!s.startsWith("[Form.")&&idx==-1) {
+                if (lastKey != null&&key != null) {
+                    String keys = lastKey + "." + key;
+                    Object o = properties.get(keys);
+                    properties.put(keys, (o == null ? "" : (String) o) + ("\r\n" + s.trim()));
+                    continue;
+                }
+            }
+            else {
+                if(s.indexOf("=")!=-1) {
+                    key = s.substring(0, idx).trim();
+                    value = s.substring(idx+1).trim();
+                }else {
+                    key = s.trim();
+                    value = "";
+                }
+                properties.put(key, value);
+            }
+
+        }
+        //调整容器中组件添加顺序
+        for(int i=0;i<containerAddList.size()-1;i++) {
+            for(int j=0;j<containerAddList.size()-1-i;j++) {
+                String value1 = "";
+                String value2 = "";
+                for(String mapKey:containerAddList.get(j).keySet()) {
+                    value1 = containerAddList.get(j).get(mapKey);
+                }
+                for(String mapKey:containerAddList.get(j+1).keySet()) {
+                    value2 = mapKey;
+                }
+                if(!"".equals(value1)&&!"".equals(value2)) {
+                    if(value1.equals(value2)) {
+                        map = containerAddList.get(j);
+                        containerAddList.set(j, containerAddList.get(j+1));
+                        containerAddList.set(j+1, map);
+                    }
+                }
+            }
+        }
+
+        //添加组件到容器
+        for(int i=0;i<containerAddList.size();i++) {
+            for(String mapKey:containerAddList.get(i).keySet()) {
+                if(mapKey.startsWith("TabContainer")) {
+                    if(addUI.containsKey(containerAddList.get(i).get(mapKey))) {
+                        String index = tabIndex.containsKey(containerAddList.get(i).get(mapKey))
+                                ?tabIndex.get(containerAddList.get(i).get(mapKey)):"1";
+                        properties.put(mapKey + ".add." + containerAddList.get(i).get(mapKey),
+                                addUI.get(containerAddList.get(i).get(mapKey)) + "," + index);
+                    }else {
+                        String index = tabIndex.containsKey(containerAddList.get(i).get(mapKey))
+                                ?tabIndex.get(containerAddList.get(i).get(mapKey)):"1";
+                        properties.put(mapKey + ".add." + containerAddList.get(i).get(mapKey),
+                                "false," + index);
+                    }
+                }else {
+                    if(addUI.containsKey(containerAddList.get(i).get(mapKey))) {
+                        properties.put(mapKey + ".add." + containerAddList.get(i).get(mapKey),
+                                addUI.get(containerAddList.get(i).get(mapKey)));
+                    }else {
+                        properties.put(mapKey + ".add." + containerAddList.get(i).get(mapKey), "false");
+                    }
+                }
+            }
+        }
+        //添加组件到Form
+        for(int i=0;i<formAddList.size();i++) {
+            if(addUI.containsKey(formAddList.get(i))) {
+                properties.put("Form.add." + formAddList.get(i), addUI.get(formAddList.get(i)));
+            }else {
+                properties.put("Form.add." + formAddList.get(i), "false");
+            }
+        }
+    }
+
+    public void loadToml1(String[] config) {
+        if (properties == null) {
+            properties = new LinkedHashtable();
+        } else
+            properties.clear();
+        if (config == null || config.length == 0)
+            return;
+        int idx = 0;
+        String lastKey = null;
+        String var = "var.";
+        String key = null;
+        String value = null;
+        String isTab = null;
+        List<String> formAddList = new ArrayList<>();
+        List<HashMap<String, String>> containerAddList = new ArrayList<HashMap<String,String>>();
+        HashMap<String, String> tabIndex = new HashMap<String,String>();
+        HashMap<String, String> addUI = new HashMap<String,String>();
+        for (int i = 0; i < config.length; i++) {
+            String s = decoding(StringUtil.toGB2312(config[i].trim()));
+            if (s.length() == 0 || s.startsWith("#")){
+                continue;
+            }
+            idx = s.indexOf("=");
+
+            //解析[Form]标签
+            if(s.startsWith("[Form")&&s.indexOf(".")==-1) {
+                lastKey = "Form";
+                properties.put(lastKey, lastKey);
+                properties.put(lastKey + "." + "id", s.substring(s.indexOf("[") + 1,s.indexOf("]")));
+                continue;
+            }
+            //解析不是 [Form 开头的控件且存在=但不存在 . 属性
+            else if(!s.startsWith("[")&&idx!=-1){
+                key = s.substring(0, idx).trim();
+                if(key.indexOf(".")==-1){
+                    if (key.contains("<p>")||key.contains("<p")||key.contains("<center>")||key.contains("</p>")
+                            ||key.contains("<span>")||key.contains("<span")||key.contains("<center>")||key.contains("</span>")
+                            ||key.contains("<div>")||key.contains("<div")||key.contains("<center>")||key.contains("</div>")
+                            ||key.contains("<img>")||key.contains("<img")||key.contains("<center>")||key.contains("</img>")) {
+                        if (lastKey != null&&key != null) {
+                            String keys = lastKey + "." + key;
+                            Object o = properties.get(keys);
+                            properties.put(keys, (o == null ? "" : (String) o) + ("\r\n" + s.trim()));
+                            continue;
+                        }
+                    }
+
+                    if(s.indexOf("\"")!=-1) {
+                        value = s.substring(s.indexOf("\"") + 1,s.lastIndexOf("\"")).trim();
+                    }else {
+                        value = s.substring(idx+1).trim();
+                    }
+
+                    if(lastKey==null){
+                        properties.put(key,value);
+                    }
+
+                    String add = "false";
+                    if(key.equals("add")) {
+                        add = value;
+                        addUI.put(lastKey, add);
+                        continue;
+                    }
+                    if(isTab!=null&&isTab.startsWith("TabContainer")&&key.equals("index")) {
+                        tabIndex.put(lastKey, value);
+                        isTab = null;
+                    }else {
+                        properties.put(lastKey + "." + key, value);
+                    }
+
+                }else{
+                    if(s.indexOf("=")!=-1) {
+                        key = s.substring(0, idx).trim();
+                        value = s.substring(idx+1).trim();
+                    }else {
+                        key = s.trim();
+                        value = "";
+                    }
+                    properties.put(key, value);
+                }
+                continue;
+            }
+            //解析 [Form. 开头且只有一个.的标签
+            else if(s.startsWith("[Form.")&&s.indexOf(".")!=-1) {
+                lastKey = s.substring(s.indexOf(".") + 1,s.indexOf("]")).trim();
+                value = lastKey.substring(0,lastKey.indexOf("_"));
+                formAddList.add(lastKey);
+                properties.put(var + lastKey, value);
+                continue;
+            }
+            //解析 [Form. 开头且有多个.的标签，此时标签为容器控件
+            else if(s.startsWith("[")&&s.indexOf(".")!=-1) {
+                String s1 = s.substring(s.indexOf("[")+1,s.indexOf("]"));
+                String [] values = s1.split("\\.");
+                value = s1.substring(s1.lastIndexOf(".")+1,s1.length()).trim();
+                HashMap<String,String> map = new HashMap<>();
+                map.put(values[values.length-2], value);
+                properties.put(var + values[values.length-1], value.substring(0, value.lastIndexOf("_")));
+                containerAddList.add(map);
+                lastKey = value;
+                isTab = s1;
+                continue;
+            }
+            //不以[From.开头且没有=
+            else if (!s.startsWith("[")&&idx==-1) {
+                if (lastKey != null&&key != null) {
+                    String keys = lastKey + "." + key;
+                    Object o = properties.get(keys);
+                    properties.put(keys, (o == null ? "" : (String) o) + ("\r\n" + s.trim()));
+                    continue;
+                }
+            }
+            else {
+                if(s.indexOf("=")!=-1) {
+                    key = s.substring(0, idx).trim();
+                    value = s.substring(idx+1).trim();
+                }else {
+                    key = s.trim();
+                    value = "";
+                }
+                properties.put(key, value);
+            }
+
+        }
+        //调整容器中组件添加顺序
+        for(int i=0;i<containerAddList.size()-1;i++) {
+            for(int j=0;j<containerAddList.size()-1-i;j++) {
+                String value1 = "";
+                String value2 = "";
+                for(String mapKey:containerAddList.get(j).keySet()) {
+                    value1 = containerAddList.get(j).get(mapKey);
+                }
+                for(String mapKey:containerAddList.get(j+1).keySet()) {
+                    value2 = mapKey;
+                }
+                if(!"".equals(value1)&&!"".equals(value2)) {
+                    if(value1.equals(value2)) {
+                        map = containerAddList.get(j);
+                        containerAddList.set(j, containerAddList.get(j+1));
+                        containerAddList.set(j+1, map);
+                    }
+                }
+            }
+        }
+
+        //添加组件到容器
+        for(int i=0;i<containerAddList.size();i++) {
+            for(String mapKey:containerAddList.get(i).keySet()) {
+                if(mapKey.startsWith("TabContainer")) {
+                    if(addUI.containsKey(containerAddList.get(i).get(mapKey))) {
+                        String index = tabIndex.containsKey(containerAddList.get(i).get(mapKey))
+                                ?tabIndex.get(containerAddList.get(i).get(mapKey)):"1";
+                        properties.put(mapKey + ".add." + containerAddList.get(i).get(mapKey),
+                                addUI.get(containerAddList.get(i).get(mapKey)) + "," + index);
+                    }else {
+                        String index = tabIndex.containsKey(containerAddList.get(i).get(mapKey))
+                                ?tabIndex.get(containerAddList.get(i).get(mapKey)):"1";
+                        properties.put(mapKey + ".add." + containerAddList.get(i).get(mapKey),
+                                "false," + index);
+                    }
+                }else {
+                    if(addUI.containsKey(containerAddList.get(i).get(mapKey))) {
+                        properties.put(mapKey + ".add." + containerAddList.get(i).get(mapKey),
+                                addUI.get(containerAddList.get(i).get(mapKey)));
+                    }else {
+                        properties.put(mapKey + ".add." + containerAddList.get(i).get(mapKey), "false");
+                    }
+                }
+            }
+        }
+        //添加组件到Form
+        for(int i=0;i<formAddList.size();i++) {
+            if(addUI.containsKey(formAddList.get(i))) {
+                properties.put("Form.add." + formAddList.get(i), addUI.get(formAddList.get(i)));
+            }else {
+                properties.put("Form.add." + formAddList.get(i), "false");
+            }
+        }
+    }
+
     public void load(String config) {
         if (config == null)
             return;
-        load(StringUtil.split(config, split));
+        loadToml1(StringUtil.split(config, split));
+//        load(StringUtil.split(config, split));
     }
 
     public void load(String[] config) {
@@ -389,7 +739,6 @@ public class Property implements Serializable {
     public LinkedHashtable searchSubKey(String key) {
         LinkedHashtable re = new LinkedHashtable();
         Vector v = keys();
-        System.out.print("");
         for (int i = 0; i < v.size(); i++) {
             String tmp = (String) v.elementAt(i);
             if (tmp.startsWith(key))
